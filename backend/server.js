@@ -1,26 +1,21 @@
+require("dotenv").config();
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+const itemRoutes = require("./routes/itemRoutes");
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
-const uri = "mongodb+srv://test:test2@cluster0.cqf1ihw.mongodb.net/?appName=Cluster0";
+const app = express();
+app.use(cors());
+app.use(express.json());
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  }
-});
+// Connexion à MongoDB Atlas
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB Atlas connecté ✅"))
+  .catch(err => console.log(err));
 
-async function run() {
-  try {
-    // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
-    // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
-  } finally {
-    // Ensures that the client will close when you finish/error
-    await client.close();
-  }
-}
-run().catch(console.dir);
+// Routes
+app.use("/items", itemRoutes);
+
+// Démarrer le serveur
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Serveur en écoute sur le port ${PORT}`));
